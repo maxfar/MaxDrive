@@ -1,0 +1,11 @@
+<h1>MaxDrive</h1>
+<h3>Node - {{ client }}</h3>
+<h3>Revisions - {{ node.title }}</h3>
+
+{% for revision in revisions %}
+	<p>{{ revision }}</p>
+{% endfor %}
+
+<form>
+	<input type="button" value="node.title" onClick="window.location.href='{{ media.url }}'">
+</form>

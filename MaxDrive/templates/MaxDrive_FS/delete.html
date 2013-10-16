@@ -1,0 +1,8 @@
+<h1>MaxDrive</h1>
+<h3>Node - {{ client }}</h3>
+<h3>Delete - {{ node.title }}</h3>
+
+<form action="http://localhost:8000/MaxDrive/User/{{ user }}{{ node.path_name }}/delete" method="POST">
+	{% csrf_token %}
+	<input type="submit" value="Delete"/>
+</form>

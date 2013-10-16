@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+
+{% block head %}
+	<link href="{{ STATIC_URL }}css/node.css" rel="stylesheet">
+{% endblock %}
+
+{% block header %}
+	<a href="http://localhost:8000/MaxDrive/Logout">Logout</a>
+{% endblock header %}
+
+{% block content %}
+	<div class="row">
+		<div class="col-lg-2">
+			{% if dir == '/'%}
+				<h3 id="content-dir">Home</h3>
+			{% else %}
+				<h3 id="content-dir">{{ dir }}</h3>
+			{% endif %}
+		</div>
+		<div class="col-lg-8">
+			<ul class="breadcrumb">
+				<li><a href="http://localhost:8000/MaxDrive/User/{{ user }}/">Home</a></li>
+  				{% for crumb in crumbs %}
+    				{% if forloop.counter == crumbs|length %}
+      					<li class="active">{{ crumb.name }}</li>
+    				{% else %}
+      					<li><a href="http://localhost:8000/MaxDrive/User/{{ user }}{{ crumb.href }}">{{ crumb.name }}</a></li>
+    				{% endif %}
+  				{% endfor %}
+			</ul>
+		</div>
+		<div class="col-lg-2">
+			<a data-toggle="modal" href="#UploadModal" class="btn btn-primary btn-sm" id="dir-button" onclick="popup('{{ user}}', '{{ node.source.short }}', '{{ node.path_name }}', '{{ node.title }}')">Upload</a>
+			<a data-toggle="modal" href="#NewDirModal" class="btn btn-primary btn-sm" id="dir-button" onclick="popup('{{ user}}', '{{ node.source.short }}', '{{ node.path_name }}', '{{ node.title }}')">New Folder</a>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-lg-2">
+			<div class="accordion" id="accordion1">
+				<div class="accordion-group">
+					<div class="accordion-heading">
+						<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion1" href="#MaxDriveStats">MaxDrive</a>
+					</div>
+					<div id="MaxDriveStats" class="accordion-body collapse in">
+		      			<div class="accordion-inner">
+		      				<div id="stat_fs_labels" style="float: left;">
+								<p>
+									Free </br>
+									Used </br>
+									Total
+								</p>
+							</div>
+							<div id="stat_fs_data">
+								<p>
+									&nbsp;:&nbsp;&nbsp;{{ stat_fs.md_quotaFree }} </br>
+									&nbsp;:&nbsp;&nbsp;{{ stat_fs.md_quotaUsed }} </br>
+									&nbsp;:&nbsp;&nbsp;{{ stat_fs.md_quota }}
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="accordion" id="accordion2">
+				<div class="accordion-group">
+					<div class="accordion-heading">
+						<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#DropboxStats">Dropbox</a>
+					</div>
+					<div id="DropboxStats" class="accordion-body collapse">
+		      			<div class="accordion-inner">
+		      				<div id="stat_fs_labels" style="float: left;">
+								<p>
+									Free </br>
+									Used </br>
+									Total
+								</p>
+							</div>
+							<div id="stat_fs_data">
+								<p>
+									&nbsp;:&nbsp;&nbsp;{{ stat_fs.db_quotaFree }} </br>
+									&nbsp;:&nbsp;&nbsp;{{ stat_fs.db_quotaUsed }} </br>
+									&nbsp;:&nbsp;&nbsp;{{ stat_fs.db_quota }}
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="accordion" id="accordion3">
+				<div class="accordion-group">
+					<div class="accordion-heading">
+						<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion3" href="#DriveStats">Google Drive</a>
+					</div>
+					<div id="DriveStats" class="accordion-body collapse">
+		      			<div class="accordion-inner">
+		      				<div id="stat_fs_labels" style="float: left;">
+								<p>
+									Free </br>
+									Used </br>
+									Total
+								</p>
+							</div>
+							<div id="stat_fs_data">
+								<p>
+									&nbsp;:&nbsp;&nbsp;{{ stat_fs.gd_quotaFree }} </br>
+									&nbsp;:&nbsp;&nbsp;{{ stat_fs.gd_quotaUsed }} </br>
+									&nbsp;:&nbsp;&nbsp;{{ stat_fs.gd_quota }}
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-10">
+			{% if response %}
+				{% if response.status == 200 %}
+					<div class="alert alert-success">
+  						<button type="button" class="close" data-dismiss="alert">&times;</button>
+ 						<strong>Success</strong> {{ response.message }}
+					</div>
+				{% elif response.status == 201 %}
+					<div class="alert alert-info">
+  						<button type="button" class="close" data-dismiss="alert">&times;</button>
+ 						<strong>Info</strong> {{ response.message }}
+					</div>
+				{% elif response.status == 400 %}
+					<div class="alert alert-danger">
+						<button type="button" class="close" data-dismiss="alert">&times;</button>
+						<strong>Warning!</strong> {{ response.message }}
+					</div>				{% else %}
+					<div class="alert">
+						<button type="button" class="close" data-dismiss="alert">&times;</button>
+						<strong>Warning!</strong> {{ response.message }}
+					</div>
+				{% endif %}
+			{% endif %}
+			<table class="table table-condensed">
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Source</th>
+						<th>Size</th>
+						<th>Modified</th>
+						<th>Operations</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for node in nodes %}
+						{% if node.is_dir == 0 and node.accessed == 0 %}
+							<tr class="active">
+						{% else %}
+							<tr>
+						{% endif %}
+							<td>
+							{% if node.is_dir %}
+								<a href="http://localhost:8000/MaxDrive/User/{{ user }}{{ split }}{{ node.path_name }}">{{ node.title }}</a>
+							{% else %}
+								{{ node.title }}
+							{% endif %}
+							</td>
+							<td>{{ node.source.name }}</td>
+							<td>{{ node.st_size }}</td>
+							<td>{{ node.st_mtime }}</td>
+							{% if node.is_dir == 0 and node.accessed == 0 %}
+								<td></td>
+							{% else %}
+								<td>
+									<a data-toggle="modal" href="#DeleteModal" class="btn btn-default btn-xs" onclick="Delete('{{ user}}', '{{ node.source.short }}', '{{ node.path_name }}', '{{ node.title }}')">Delete</a>
+									{% if node.source.short == 'maxdrive' %}
+									{% else %}
+										<a data-toggle="modal" class="btn btn-default btn-xs" onclick="Revisions('{{ user}}', '{{ node.source.short }}', '{{ node.path_name }}', '{{ node.title }}')">Revisions</a>
+									{% endif %}
+									<a data-toggle="modal" class="btn btn-default btn-xs" onclick="Download('{{ user}}', '{{ node.source.short }}', '{{ node.path_name }}', '{{ node.title }}')">Get Link</a>
+								</td>
+							{% endif %}
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+{% endblock content %}
+
+
+{% block footer %}
+	<div class="navbar navbar-fixed-bottom">
+		<p class="navbar-text pull-left">
+			Dev Links: 
+				<a data-toggle="modal" href="#RebuildModal" class="navbar-link">Rebuild</a>&nbsp;&nbsp;/&nbsp;&nbsp;
+				<a href="#" class="navbar-link">Testing</a>
+		</p>
+  	</div>
+	<!-- Rebuild Modal -->
+	<div class="modal fade" id="RebuildModal">
+	<div class="modal-dialog">
+	  <div class="modal-content">
+	    <div class="modal-header">
+	      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	      <h4 class="modal-title">Rebuild</h4>
+	    </div>
+	    <div class="modal-body">
+	    	<p>
+	    		Are you sure you want to rebuild the DB?
+	    		<a href="http://localhost:8000/MaxDrive/User/{{ user }}/rebuild" class="btn btn-primary btn-xs">Yes</a>
+  				<button type="button" class="btn btn-default btn-xs" data-dismiss="modal">Nope</button>
+			</p>
+	    </div>
+	  </div><!-- /.modal-content -->
+	</div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
+  <!-- Upload Modal -->
+  <div class="modal fade" id="UploadModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Upload</h4>
+        </div>
+        <div class="modal-body">
+			<form action="http://localhost:8000/MaxDrive/User/{{ user }}{{ parent }}{{ split }}upload" method="POST" enctype="multipart/form-data">
+				{% csrf_token %}
+				{{ forms.upload.as_p }}
+				<input type="submit" value="Upload" class="btn btn-primary"/>
+			</form>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+  <!-- New Dir Modal -->
+  <div class="modal fade" id="NewDirModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">New Folder</h4>
+        </div>
+        <div class="modal-body">
+			<form action="http://localhost:8000/MaxDrive/User/{{ user }}{{ parent }}/mkdir" method="POST" enctype="multipart/form-data">
+				{% csrf_token %}
+				{{ forms.new_dir.as_p }}
+				<input type="submit" value="Upload" class="btn btn-primary"/>
+			</form>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+   <!-- Delete Modal -->
+  <div class="modal fade" id="DeleteModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+        	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			<form action="" method="POST" id="delete-form">
+				{% csrf_token %}
+				<input type="submit" value="Delete" class="btn btn-primary"/>
+			</form>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+  <!-- Revisions Modal -->
+  <div class="modal fade" id="RevisionsModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Revisions</h4>
+        </div>
+        <div class="modal-body" id="revisions-body">
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+  <!-- Download Modal -->
+  <div class="modal fade" id="DownloadModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Download</h4>
+        </div>
+        <div class="modal-body" id="download-body">
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+{% endblock footer%}
+
+{% block scripts %}
+	<script>
+		var url_base = 'http://localhost:8000/MaxDrive/User/';
+
+		function Delete(user, source, path, title) {
+			$("#delete-form").attr("action", url_base + user + path +'/delete');
+		}
+
+		function Revisions(user, source, path, title) {
+			Dajaxice.MaxDrive_FS.revisions(Revisions_callback, {'source':source, 'path':path});
+			return false;
+		}
+
+		function Revisions_callback(data) {
+			if(data.status == 400) {
+				$('#revisions-body').empty().append("<p>"+data.response+"</>")
+			}
+			else {
+				$('#revisions-body').empty().append("<table class='table-striped table-condensed table-bordered' id='revisions-table'><thead><tr><th>id</th><th>Modified</th><th>Size</th><th>Name</th></tr></thead><tbody></tbody></table>")
+
+				for (var i=0;i<data.revisions.length;i++) { 
+					console.log(i + " " + data.revisions[i].rev);
+					$('#revisions-table > tbody:last').append("<tr><td>"+data.revisions[i].rev+"</td><td>"+data.revisions[i].modified+"</td><td>"+data.revisions[i].size+"</td><td>"+data.revisions[i].path+"</td></tr>");
+				}
+			}
+
+			$('#RevisionsModal').modal({
+				keyboard: true,
+				show: true
+			})
+		}
+
+		function Download(user, source, path, title) {
+			Dajaxice.MaxDrive_FS.download(Download_callback, {'source':source, 'path':path});
+			return false;
+		}
+
+		function Download_callback(data) {
+			console.log(data)
+			if(data.status == 200) {
+				console.log('status 200')
+				$('#download-body').empty().append("<a href='"+data.url+"'>Download<a/><p>"+data.data+"</p>")
+			}
+			else if(data.status == 201) {
+				console.log('status 201')
+				$('#download-body').empty().append("<a href='http://localhost:8000/media/"+data.url+"'>Download<a/><p>"+data.data+"</p>")
+			}
+			else {
+				console.log('status fail')
+				$('#download-body').empty().append("<p>"+data.message+"</>")
+			}
+
+			/*
+			if(data.status != 200) {
+				$('#download-body').empty().append("<p>"+data.message+"</>")
+			}
+			else if(data.status = 200) {
+				$('#download-body').empty().append("<a href='"+data.url+"'>Download<a/><p>"+data.data+"</p>")
+			}
+			else if(data.status = 201) {
+				$('#download-body').empty().append("<a href='"+data.url+"'>Download<a/><p>"+data.data+"</p>")
+			}
+			*/
+
+			$('#DownloadModal').modal({
+				keyboard: true,
+				show: true
+			})
+		}
+
+	</script>
+{% endblock scripts %}

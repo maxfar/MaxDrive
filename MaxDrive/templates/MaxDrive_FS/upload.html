@@ -1,0 +1,9 @@
+<h1>MaxDrive</h1>
+<h3>Node - {{ client }}</h3>
+<h3>Upload - {{ parent }}</h3>
+
+<form action="http://localhost:8000/MaxDrive/User/{{ user }}{{ parent }}/upload" method="POST" enctype="multipart/form-data">
+	{% csrf_token %}
+	{{ form.as_p }}
+	<input type="submit" value="Upload"/>
+</form>

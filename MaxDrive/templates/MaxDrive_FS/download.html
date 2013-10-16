@@ -1,0 +1,10 @@
+<h1>MaxDrive</h1>
+<h3>Node - {{ client }}</h3>
+<h3>Download - {{ node.title }}</h3>
+
+<a href="{{ media.url }}" target="_blank">{{ node.title }}</a> <p>{{ media.expires }}</p>
+<a href="{{ media.url2 }}">{{ node.title }}</a> <p>{{ media.expires }}</p>
+
+<form>
+	<input type="button" value="node.title" onClick="window.location.href='{{ media.url }}'">
+</form>

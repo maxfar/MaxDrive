@@ -1,0 +1,9 @@
+<h1>MaxDrive</h1>
+<h3>Node - {{ client }}</h3>
+<h3>Mkdir - {{ parent }}</h3>
+
+<form action="http://localhost:8000/MaxDrive/User/{{ user }}{{ parent }}/mkdir" method="POST">
+	{% csrf_token %}
+	{{ form.as_p }}
+	<input type="submit" value="Create"/>
+</form>

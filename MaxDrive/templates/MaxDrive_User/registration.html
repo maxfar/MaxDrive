@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block head %}
+	<link href="{{ STATIC_URL }}css/registration.css" rel="stylesheet">
+{% endblock %}
+
+{% block header %}
+	<a href="http://localhost:8000/MaxDrive" id="header-login">Login</a>
+{% endblock %}
+
+<form action="/MaxDrive/Register" method="POST">{% csrf_token %}
+	{{ form.as_p }}
+	<input type="submit" value="Submit" />
+</form>
+
+<a href="http://localhost:8000/MaxDrive">Landing</a>
+
+{% block content %}
+	<div class="col-lg-6 col-lg-offset-4">
+		<form action="/MaxDrive/Register" method="POST">{% csrf_token %}
+			{% load crispy_forms_tags %}
+			{% crispy forms.user %}
+			{% crispy forms.dropbox %}
+			{% crispy forms.drive %}
+			<input type="submit" value="Submit" />
+		</form>
+	</div>
+	<div class="col-lg-2"></div>
+{% endblock content%}
